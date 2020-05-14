@@ -1,0 +1,36 @@
+using Game.Misc;
+
+namespace Game.Model
+{
+    public partial class ModelPacMan
+    {
+        class CmdMovePacMan : ICommand
+        {
+            eDirection _direction;
+
+            // ========================================
+
+            public CmdMovePacMan(eDirection direction)
+            { _direction = direction; }
+
+            // ============== ICommand ================
+
+            void ICommand.Exec(IContextWritable context)
+            {
+             
+                IPacManWritable pacMan = context.CharactardsContainer.Get<IPacManWritable>();
+                if (context.Field.Cells[pacMan.X, pacMan.Y].IsOccupied == false) context.Field.Cells[pacMan.X, pacMan.Y].SetEmployment(true);
+
+
+                bool isCanMove = context.Field.IsCanMove(pacMan.X, pacMan.Y, _direction);
+
+                if (isCanMove)
+                {
+                    (int x, int y) nextPositon = Direction.GetNextPosition(pacMan.X, pacMan.Y, _direction);
+                    pacMan.UpdatePosition(nextPositon.x, nextPositon.y);
+                    context.EventManager.Get<IPacManEventsWritable>().UpdatePacManPosition(nextPositon.x, nextPositon.y);
+                }
+            }
+        }
+    }
+}
